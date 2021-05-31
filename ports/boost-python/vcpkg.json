@@ -35,14 +35,22 @@
     "boost-tuple",
     "boost-type-traits",
     "boost-utility",
-    "boost-vcpkg-helpers",
-    "python3"
+    "boost-vcpkg-helpers"
   ],
   "features": {
     "python2": {
       "description": "Build with Python2 support",
       "dependencies": [
         "python2"
+      ]
+    },
+    "python3": {
+      "description": "Build with Python3 support",
+      "dependencies": [
+        {
+          "name": "python3",
+          "platform": "windows"
+        }
       ]
     }
   }
