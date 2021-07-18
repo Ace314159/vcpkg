@@ -1,0 +1,14 @@
+{
+  "name": "graphviz",
+  "version-string": "2.47.3",
+  "homepage": "https://graphviz.org/",
+  "description": "Graph Visualization Tools",
+  "dependencies": [
+    "cairo",
+    "getopt",
+    "libffi",
+    "libgd",
+    "pango",
+    "pkgconf"
+  ]
+}
