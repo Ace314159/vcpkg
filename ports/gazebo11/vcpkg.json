@@ -1,0 +1,99 @@
+{
+  "name": "gazebo11",
+  "version-string": "11.7.0",
+  "description": "Open source robotics simulator.",
+  "homepage": "http://gazebosim.org",
+  "dependencies": [
+    "boost-asio",
+    "boost-date-time",
+    "boost-filesystem",
+    "boost-interprocess",
+    "boost-iostreams",
+    "boost-program-options",
+    "boost-regex",
+    "boost-system",
+    "boost-thread",
+    "ccd",
+    "ignition-common3",
+    "ignition-fuel-tools4",
+    "ignition-math6",
+    "ignition-msgs5",
+    "ignition-transport8",
+    "ogre",
+    "pkgconf",
+    "protobuf",
+    "qwt",
+    "sdformat9",
+    "tbb"
+  ],
+  "default-features": [
+    "openal",
+    "simbody",
+    "dart",
+    "ffmpeg",
+    "gts",
+    "bullet",
+    "libusb",
+    "gdal",
+    "graphviz"
+  ],
+  "features": {
+    "openal": {
+      "description": "Enable audio support",
+      "dependencies": [
+        "openal-soft"
+      ]
+    },
+    "simbody": {
+      "description": "Use the simbody physics engine",
+      "dependencies": [
+        "simbody"
+      ]
+    },
+    "dart": {
+      "description": "Use the dart physics engine",
+      "dependencies": [
+        "dartsim"
+      ]
+    },
+    "ffmpeg": {
+      "description": "Enable audio-video capabilities",
+      "dependencies": [
+        {
+          "name": "ffmpeg",
+          "features": ["swscale", "avformat", "avcodec"]
+        }
+      ]
+    },
+    "gts": {
+      "description": "Enable CSG support",
+      "dependencies": [
+        "gts"
+      ]
+    },
+    "bullet": {
+      "description": "Use the bullet physics engine",
+      "dependencies": [
+        "bullet3"
+      ]
+    },
+    "libusb": {
+      "description": "Enable USB peripheral support",
+      "dependencies": [
+        "libusb"
+      ]
+    },
+    "gdal": {
+      "description": "Enable digital elevation terrains support",
+      "dependencies": [
+        "gdal"
+      ]
+    },
+    "graphviz": {
+      "description": "Enable model editor's schematic view",
+      "dependencies": [
+        "graphviz"
+      ]
+    }
+  }
+}

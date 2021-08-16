@@ -1,0 +1,151 @@
+﻿diff --git a/CMakeLists.txt b/CMakeLists.txt
+index f675d6f336..34a2150312 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -177,11 +177,11 @@ if(WIN32)
+ else()
+   set(GAZEBO_PLUGIN_PATH ${GAZEBO_PLUGIN_LIB_INSTALL_DIR})
+ endif()
+-FILE(TO_NATIVE_PATH "${GAZEBO_PLUGIN_PATH}" GAZEBO_PLUGIN_PATH)
++FILE(TO_CMAKE_PATH "${GAZEBO_PLUGIN_PATH}" GAZEBO_PLUGIN_PATH)
+ set(GAZEBO_MODEL_PATH ${CMAKE_INSTALL_FULL_DATAROOTDIR}/gazebo-${GAZEBO_MAJOR_VERSION}/models)
+-FILE(TO_NATIVE_PATH "${GAZEBO_MODEL_PATH}" GAZEBO_MODEL_PATH)
++FILE(TO_CMAKE_PATH "${GAZEBO_MODEL_PATH}" GAZEBO_MODEL_PATH)
+ set(GAZEBO_RESOURCE_PATH ${CMAKE_INSTALL_FULL_DATAROOTDIR}/gazebo-${GAZEBO_MAJOR_VERSION})
+-FILE(TO_NATIVE_PATH "${GAZEBO_RESOURCE_PATH}" GAZEBO_RESOURCE_PATH)
++FILE(TO_CMAKE_PATH "${GAZEBO_RESOURCE_PATH}" GAZEBO_RESOURCE_PATH)
+ set(GAZEBO_MODEL_DATABASE_URI http://models.gazebosim.org)
+ set(OGRE_RESOURCE_PATH ${OGRE_PLUGINDIR})
+ # Seems that OGRE_PLUGINDIR can end in a newline, which will cause problems when
+diff --git a/cmake/FindGraphviz.cmake b/cmake/FindGraphviz.cmake
+index 4d6d6fc452..6067f5c114 100644
+--- a/cmake/FindGraphviz.cmake
++++ b/cmake/FindGraphviz.cmake
+@@ -16,13 +16,13 @@ endif ( GRAPHVIZ_CGRAPH_LIBRARY )
+ 
+ # use pkg-config to get the directories and then use these values
+ # in the FIND_PATH() and FIND_LIBRARY() calls
+-if( NOT WIN32 )
++if( true )
+   find_package(PkgConfig)
+ 
+   pkg_check_modules(GRAPHVIZ_GVC_PKG libgvc)
+   pkg_check_modules(GRAPHVIZ_CGRAPH_PKG libcgraph)
+   pkg_check_modules(GRAPHVIZ_CDT_PKG libcdt)
+-endif( NOT WIN32 )
++endif()
+ 
+ FIND_LIBRARY(GRAPHVIZ_GVC_LIBRARY NAMES gvc libgvc
+   PATHS
+diff --git a/cmake/GazeboUtils.cmake b/cmake/GazeboUtils.cmake
+index 6842ae7c91..8cc463599f 100644
+--- a/cmake/GazeboUtils.cmake
++++ b/cmake/GazeboUtils.cmake
+@@ -181,7 +181,7 @@ macro (gz_setup_windows)
+     endif()
+ 
+     if (MSVC)
+-      add_compile_options(/Zc:__cplusplus)
++      add_compile_options(/Zc:__cplusplus /permissive- /Zc:strictStrings-)
+     endif()
+ endmacro()
+ 
+diff --git a/cmake/SearchForStuff.cmake b/cmake/SearchForStuff.cmake
+index 4085b5aaeb..0f56c34625 100644
+--- a/cmake/SearchForStuff.cmake
++++ b/cmake/SearchForStuff.cmake
+@@ -145,7 +145,7 @@ if (PKG_CONFIG_FOUND)
+   set(SimTK_INSTALL_DIR ${SimTK_INSTALL_PREFIX})
+   #list(APPEND CMAKE_MODULE_PATH ${SimTK_INSTALL_PREFIX}/share/cmake)
+   find_package(Simbody)
+-  if (Simbody_FOUND)
++  if (Simbody_FOUND AND SIMBODY_FEATURE)
+     message (STATUS "Looking for Simbody - found")
+     set (HAVE_SIMBODY TRUE)
+   else()
+@@ -158,7 +158,7 @@ if (PKG_CONFIG_FOUND)
+   # Find DART
+   set(DART_MIN_REQUIRED_VERSION 6.6)
+   find_package(DART ${DART_MIN_REQUIRED_VERSION} CONFIG OPTIONAL_COMPONENTS collision-bullet collision-ode utils-urdf)
+-  if (DART_FOUND)
++  if (DART_FOUND AND DART_FEATURE)
+     message (STATUS "Looking for DART - found")
+     set (HAVE_DART TRUE)
+     if (DART_utils-urdf_FOUND)
+@@ -513,7 +513,7 @@ if (PKG_CONFIG_FOUND)
+   endif ()
+ 
+   if (libavutil_FOUND AND libavformat_FOUND AND libavcodec_FOUND AND
+-      libswscale_FOUND)
++      libswscale_FOUND AND FFMPEG_FEATURE)
+     set (HAVE_FFMPEG TRUE)
+   else ()
+     set (HAVE_FFMPEG FALSE)
+@@ -538,7 +538,7 @@ if (PKG_CONFIG_FOUND)
+   ########################################
+   # Find GNU Triangulation Surface Library
+   pkg_check_modules(gts gts)
+-  if (gts_FOUND)
++  if (gts_FOUND AND GTS_FEATURE)
+     message (STATUS "Looking for GTS - found")
+     set (HAVE_GTS TRUE)
+   else ()
+@@ -551,13 +551,14 @@ if (PKG_CONFIG_FOUND)
+   # First and preferred option is to look for bullet standard pkgconfig,
+   # so check it first. if it is not present, check for the OSRF
+   # custom bullet2.82.pc file
+-  pkg_check_modules(BULLET bullet>=2.82)
++  find_package(BULLET CONFIG 2.82)
+   if (NOT BULLET_FOUND)
+      pkg_check_modules(BULLET bullet2.82>=2.82)
+   endif()
+ 
+-  if (BULLET_FOUND)
++  if (BULLET_FOUND AND BULLET_FEATURE)
+     set (HAVE_BULLET TRUE)
++    set(BULLET_VERSION ${BULLET_VERSION_STRING})
+     add_definitions( -DLIBBULLET_VERSION=${BULLET_VERSION} )
+   else()
+     set (HAVE_BULLET FALSE)
+@@ -572,7 +573,7 @@ if (PKG_CONFIG_FOUND)
+   ########################################
+   # Find libusb
+   pkg_check_modules(libusb-1.0 libusb-1.0)
+-  if (NOT libusb-1.0_FOUND)
++  if (NOT libusb-1.0_FOUND OR NO_LIBUSB_FEATURE)
+     BUILD_WARNING ("libusb-1.0 not found. USB peripherals support will be disabled.")
+     set (HAVE_USB OFF CACHE BOOL "HAVE USB" FORCE)
+   else()
+@@ -648,7 +649,7 @@ endif ()
+ ########################################
+ # Find gdal
+ include (FindGDAL)
+-if (NOT GDAL_FOUND)
++if (NOT GDAL_FOUND OR NO_GDAL_FEATURE)
+   message (STATUS "Looking for libgdal - not found")
+   BUILD_WARNING ("GDAL not found, Digital elevation terrains support will be disabled.")
+   set (HAVE_GDAL OFF CACHE BOOL "HAVE GDAL" FORCE)
+@@ -718,7 +719,7 @@ endif()
+ ########################################
+ # Find graphviz
+ include (${gazebo_cmake_dir}/FindGraphviz.cmake)
+-if (NOT GRAPHVIZ_FOUND)
++if (NOT GRAPHVIZ_FOUND OR NO_GRAPHVIZ_FEATURE)
+   message (STATUS "Looking for libgraphviz-dev - not found")
+   BUILD_WARNING ("Graphviz not found, Model editor's schematic view will be disabled.")
+   set (HAVE_GRAPHVIZ OFF CACHE BOOL "HAVE GRAPHVIZ" FORCE)
+diff --git a/gazebo/common/MeshCSG.hh b/gazebo/common/MeshCSG.hh
+index 02d90a3933..d6aa635a4b 100644
+--- a/gazebo/common/MeshCSG.hh
++++ b/gazebo/common/MeshCSG.hh
+@@ -26,6 +26,10 @@ typedef _GtsSurface GtsSurface;
+ struct _GPtrArray;
+ typedef _GPtrArray GPtrArray;
+ 
++#ifdef DIFFERENCE
++#undef DIFFERENCE
++#endif
++
+ namespace gazebo
+ {
+   namespace common
